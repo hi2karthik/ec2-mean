@@ -1,0 +1,34 @@
+<section data-ng-controller="KeypairsController" data-ng-init="initRequests()">
+    <div class="page-header">
+        <h1>New KeyPair</h1>
+    </div>
+    <div class="col-md-12">
+        <form class="form-horizontal" data-ng-submit="createkeypair()" novalidate>
+            <fieldset>
+                <div class="form-group">
+                    <label class="control-label" for="region">Region</label>
+                    <div class="controls">
+                        <select data-ng-model="selectedregion" data-ng-options="aregion as aregion.fullname for aregion in regions" id="region" class="form-control" required>
+                        </select>
+                    </div>
+                    <label class="control-label" for="name">Name</label>
+                    <div class="controls">
+                        <input type="text" data-ng-model="name" id="name" class="form-control" placeholder="Name" required>
+                    </div>
+                    <label class="control-label" for="filepath">File Path</label>
+                    <div class="controls">
+                        <input type="text" data-ng-model="selectedfilepath" id="filepath" class="form-control" placeholder="File Path" required>
+                    </div>
+                    <br>
+                    <div class="controls">
+                        <input type="submit" class="btn btn-default" data-ng-disabled="!selectedregion">
+                    </div>
+
+                    <div data-ng-show="error" class="text-danger">
+                        <strong data-ng-bind="error"></strong>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+</section>

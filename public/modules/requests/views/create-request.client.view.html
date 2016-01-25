@@ -1,0 +1,243 @@
+<section data-ng-controller="RequestsController" data-ng-init="initRequests()">
+
+    <div class="col-md-12" data-ng-show="!images.length">
+        <div class="page-header">
+            <h1>Search Image</h1>
+        </div>
+        <span us-spinner spinner-on="showSpinner"></span>
+        <form class="form-horizontal" data-ng-submit="searchimages()" novalidate>
+            <fieldset>
+                <div class="form-group">
+                    <label class="control-label" for="region">Region</label>
+                    <div class="controls">
+                        <select data-ng-model="selectedregion" data-ng-options="aregion as aregion.fullname for aregion in regions" id="region" class="form-control" required>
+                        </select>
+                    </div>
+                    <label class="control-label">Architecture</label>
+                    <div class="controls">
+                        <label class="checkbox-inline" data-ng-repeat="architecture in architectures" for="{{architecture.value}}">
+                            <input type="checkbox" data-ng-model="selectedarchitecture.values[architecture.value]" id="{{architecture.value}}" data-ng-disabled="!selectedregion">{{architecture.name}}
+                        </label>
+                    </div>
+                    <label class="control-label">Platform</label>
+                    <div class="controls">
+                        <label class="checkbox-inline" for="onlywindows">
+                            <input type="checkbox" name="onlywindows" data-ng-model="onlywindows" id="onlywindows" value="onlywindows" data-ng-disabled="!selectedregion">Windows
+                        </label>
+                    </div>
+                    <label class="control-label">Virtualization Types</label>
+                    <div class="controls">
+                        <label class="checkbox-inline" data-ng-repeat="virtualizationtype in virtualizationtypes" for="{{virtualizationtype.value}}">
+                            <input type="checkbox" data-ng-model="selectedvirtualizationtype.values[virtualizationtype.value]" id="{{virtualizationtype.value}}" data-ng-disabled="!selectedregion">{{virtualizationtype.name}}
+                        </label>
+                    </div>
+                    <label class="control-label">Image Owner</label>
+                    <div class="controls">
+                        <label class="checkbox-inline" data-ng-repeat="imageowner in imageowners" for="{{imageowner.value}}">
+                            <input type="checkbox" data-ng-model="selectedimageowner.values[imageowner.value]" id="{{imageowner.value}}" data-ng-disabled="!selectedregion">{{imageowner.name}}
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <input type="submit" class="btn btn-default" data-ng-disabled="!selectedregion">
+                </div>
+                <div data-ng-show="error" class="text-danger">
+                    <strong data-ng-bind="error"></strong>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+    <div class="col-md-12" data-ng-show="images.length && !selectedimage">
+        <div class="page-header">
+            <h1>Choose Image</h1>
+        </div>
+        <div class="panel panel-info">
+            <div class="panel-heading">Available Images - Choose One</div>
+            <br>
+            <form class="form-inline">
+                <div class="form-group">
+                    <label>&nbsp;&nbsp;&nbsp;Search</label>
+                    <input type="text" ng-model="imagesearch" class="form-control" placeholder="Search Image...">
+                </div>
+            </form>
+            <table class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                    <th>AMI Name</th>
+                    <th>Description</th>
+                    <th>AMI ID</th>
+                    <th>Source</th>
+                    <th>Owner</th>
+                    <th>Status</th>
+                    <th>Architecture</th>
+                    <th>Virtualization Type</th>
+                    <th>Root Device Type</th>
+                </tr>
+                </thead>
+                <tbody dir-paginate="image in images | filter: imagesearch | itemsPerPage:6" >
+                <tr>
+                    <td data-ng-bind="image.Name"></td>
+                    <td data-ng-bind="image.Description"></td>
+                    <td data-ng-bind="image.ImageId"></td>
+                    <td data-ng-bind="image.ImageLocation"></td>
+                    <td data-ng-bind="image.ImageOwnerAlias"></td>
+                    <td data-ng-bind="image.State"></td>
+                    <td data-ng-bind="image.Architecture"></td>
+                    <td data-ng-bind="image.VirtualizationType"></td>
+                    <td data-ng-bind="image.RootDeviceType"></td>
+                    <td>
+                        <a class="btn btn-primary btn-xs" data-ng-click="selectimage(image);">
+                            <i class="glyphicon glyphicon-play-circle">
+                            </i>
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <dir-pagination-controls
+                    max-size="6"
+                    direction-links="true"
+                    boundary-links="true" >
+            </dir-pagination-controls>
+        </div>
+        <div class="form-group">
+            <button class="btn btn-default" ng-click="cancelimageselect()" >
+                Cancel
+            </button>
+        </div>
+    </div>
+    <div class="col-md-12" data-ng-show="selectedimage && !selectedsecuritygroup">
+        <div class="page-header">
+            <h1>Choose Instance Type and Security Group</h1>
+        </div>
+        <div>
+            <span><b>AMI ID</b>: {{selectedimage.ImageId}}</span><br>
+            <span><b>Name</b>: {{selectedimage.Name}}</span><br>
+            <span><b>Description</b>: {{selectedimage.Description}}</span><br>
+        </div>
+        <form class="form-horizontal" novalidate>
+            <fieldset>
+                <div class="form-group">
+                    <label class="control-label" for="instancetype">Instance Type</label>
+                    <div class="controls">
+                        <select data-ng-model="selectedinstancetype" data-ng-options="ainstancetype as ainstancetype.name for ainstancetype in instancetypes" id="instancetype" class="form-control" required>
+                        </select>
+                    </div>
+                    <label class="control-label" for="instancetype">Security Group</label>
+                    <div class="controls">
+                        <div class="panel panel-info">
+                            <div class="panel-heading">
+                                Choose an existing security group
+                            </div>
+                            <br>
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                <tr>
+                                    <th>Group ID</th>
+                                    <th>Group Name</th>
+                                    <th>Description</th>
+                                </tr>
+                                </thead>
+                                <tbody data-ng-repeat="securitygroup in securitygroups" >
+                                <tr>
+                                    <td data-ng-bind="securitygroup.GroupId"></td>
+                                    <td data-ng-bind="securitygroup.GroupName"></td>
+                                    <td data-ng-bind="securitygroup.Description"></td>
+                                    <td>
+                                        <a class="btn btn-primary btn-xs" data-ng-click="selectsecuritygroup(securitygroup);">
+                                            <i class="glyphicon glyphicon-play-circle">
+                                            </i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <br>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+        <div class="form-group">
+            <button class="btn btn-default" ng-click="cancelinstanceselect()" >
+                Cancel
+            </button>
+        </div>
+    </div>
+    <div class="col-md-12" data-ng-show="selectedsecuritygroup && !selectedkeypair">
+        <div class="page-header">
+            <h1>Choose Key Pair</h1>
+        </div>
+        <div>
+            <span><b>AMI ID</b>: {{selectedimage.ImageId}}</span><br>
+            <span><b>Name</b>: {{selectedimage.Name}}</span><br>
+            <span><b>Description</b>: {{selectedimage.Description}}</span><br>
+        </div>
+        <form class="form-horizontal" novalidate>
+            <fieldset>
+                <div class="form-group">
+                    <div class="controls">
+                        <div class="panel panel-info">
+                            <div class="panel-heading">
+                                Choose an existing key pair
+                            </div>
+                            <br>
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                <tr>
+                                    <th>Key Name</th>
+                                    <th>Key Fingerprint</th>
+                                </tr>
+                                </thead>
+                                <tbody data-ng-repeat="keypair in keypairs" >
+                                <tr>
+                                    <td data-ng-bind="keypair.KeyName"></td>
+                                    <td data-ng-bind="keypair.KeyFingerprint"></td>
+                                    <td>
+                                        <a class="btn btn-primary btn-xs" data-ng-click="selectkeypair(keypair);">
+                                            <i class="glyphicon glyphicon-play-circle">
+                                            </i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <br>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+        <div class="form-group">
+            <button class="btn btn-default" ng-click="cancelkeypairselect()" >
+                Cancel
+            </button>
+        </div>
+
+    </div>
+    <div class="col-md-12" data-ng-show="selectedkeypair">
+        <div class="page-header">
+            <h1>Confirm Instance Information</h1>
+        </div>
+        <div>
+            <span><b>AMI ID</b>: {{selectedimage.ImageId}}</span><br>
+            <span><b>Name</b>: {{selectedimage.Name}}</span><br>
+            <span><b>Description</b>: {{selectedimage.Description}}</span><br><br>
+            <span><b>Instance Type</b>: {{selectedinstancetype.name}}</span><br>
+            <span><b>Security Group</b>: {{selectedsecuritygroup.GroupName}}</span><br>
+            <span><b>Key Pair</b>: {{selectedkeypair.KeyName}}</span><br>
+        </div>
+        <br>
+        <div class="form-group">
+            <button class="btn btn-default" ng-click="cancelconfirmationselect()" >
+                Cancel
+            </button>
+            <button class="btn btn-default" ng-click="requestinstance()" >
+                Request Instance
+            </button>
+        </div>
+        <div data-ng-show="error" class="text-danger">
+            <strong data-ng-bind="error"></strong>
+        </div>
+    </div>
+</section>

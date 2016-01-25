@@ -1,0 +1,77 @@
+<section data-ng-controller="RequestsController" data-ng-init="find()">
+
+	<div class="page-header">
+		<h1>Instances</h1>
+	</div>
+
+    <form class="form-horizontal" novalidate>
+        <fieldset>
+            <div class="form-group">
+                <label class="control-label" for="region">Region</label>
+                <div class="controls">
+                    <select data-ng-model="selectedregion" data-ng-options="aregion as aregion.fullname for aregion in regions" id="region" class="form-control" data-ng-change="retrieveInstances()" required>
+                    </select>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+
+    <span us-spinner spinner-on="showSpinner"></span>
+    <div class="panel panel-info" data-ng-hide="!instances.length">
+        <div class="panel-heading">List of Instances</div>
+        <br>
+        <form class="form-inline">
+            <div class="form-group">
+                <label>&nbsp;&nbsp;&nbsp;Search</label>
+                <input type="text" ng-model="instancesearch" class="form-control" placeholder="Search Instance...">
+            </div>
+        </form>
+        <table class="table table-bordered table-hover">
+            <thead>
+            <tr>
+                <th>Instance ID</th>
+                <th>Instance Type</th>
+                <th>Availability Zone</th>
+                <th>Instance State</th>
+                <th>Public DNS</th>
+                <th>Public IP</th>
+                <th>Key Name</th>
+                <th>Security Group</th>
+            </tr>
+            </thead>
+            <tbody data-ng-repeat="reservation in instances">
+            <tr data-ng-repeat="instance in reservation.Instances | filter: instancesearch">
+                <td data-ng-bind="instance.InstanceId"></td>
+                <td data-ng-bind="instance.InstanceType"></td>
+                <td data-ng-bind="instance.Placement.AvailabilityZone"></td>
+                <td data-ng-bind="instance.State.Name"></td>
+                <td data-ng-bind="instance.PublicDnsName"></td>
+                <td data-ng-bind="instance.PublicIpAddress"></td>
+                <td data-ng-bind="instance.KeyName"></td>
+                <td data-ng-bind="instance.SecurityGroups[0].GroupName"></td>
+                <td>
+                    <a class="btn btn-primary btn-xs" data-ng-click="stopinstance(instance);">
+                        <i class="glyphicon glyphicon-stop">
+                        </i>
+                    </a>
+                </td>
+                <td>
+                    <a class="btn btn-primary btn-xs" data-ng-click="terminateinstance(instance);">
+                        <i class="glyphicon glyphicon-trash">
+                        </i>
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="form-group">
+        <button class="btn btn-default" ng-click="refreshinstances()" >
+            Refresh
+        </button>
+    </div>
+
+    <div data-ng-show="error" class="text-danger">
+        <strong data-ng-bind="error"></strong>
+    </div>
+</section>
